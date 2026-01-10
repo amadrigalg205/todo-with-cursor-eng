@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
@@ -13,10 +13,16 @@ interface Todo {
 }
 
 export default function TodoList() {
+  const [mounted, setMounted] = useState(false)
   const [todos, setTodos] = useState<Todo[]>([])
   const [inputValue, setInputValue] = useState("")
   const [editingId, setEditingId] = useState<number | null>(null)
   const [editingText, setEditingText] = useState("")
+
+  // Wait for client-side mount to prevent hydration errors
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const addTodo = () => {
     if (inputValue.trim() === "") return
@@ -55,6 +61,11 @@ export default function TodoList() {
 
   const toggleComplete = (id: number) => {
     setTodos(todos.map((todo) => (todo.id === id ? { ...todo, completed: !todo.completed } : todo)))
+  }
+
+  // Don't render until mounted on client to prevent hydration mismatch
+  if (!mounted) {
+    return null
   }
 
   return (
